@@ -1,0 +1,12 @@
+---
+# defaults file for ansible-role-apache
+
+# Apache modules to load
+apache_modules_load:
+  - headers
+  - ssl
+  - rewrite
+
+# Apache modules to unload
+apache_modules_unload:
+  - userdir

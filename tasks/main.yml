@@ -1,0 +1,42 @@
+---
+# tasks file for ansible-role-apache
+
+- name: Install packages
+  package:
+    name: "{{ packages }}"
+    state: present
+  vars:
+    packages:
+    - apache2
+
+- name: Create directories
+  file:
+    dest: "{{ item.dest }}"
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
+    state: directory
+    mode: "{{ item.mode }}"
+  with_items:
+    - { dest: /etc/apache2/sites-enabled, owner: root, group: 0, mode: "0600" }
+    - { dest: /var/customers/webs/, owner: root, group: 0, mode: "0755" }
+    - { dest: /var/customers/logs/, owner: root, group: 0, mode: "0755" }
+    - { dest: /var/customers/tmp/, owner: root, group: root, mode: "1777" }
+    
+- name: Enable apache modules
+  apache2_module:
+    state: present
+    name: "{{ item }}"
+  with_items: "{{ apache_modules_load }}"
+
+- name: Disable apache modules
+  apache2_module:
+    state: absent
+    name: "{{ item }}"
+  with_items: "{{ apache_modules_unload }}"
+
+- name: Lets encrypt apache alias
+  template: 
+    src: acme.conf
+    dest: /etc/apache2/conf-enabled/acme.conf
+  notify:
+    - restart apache2
